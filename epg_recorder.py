@@ -53,7 +53,9 @@ def load_config() -> dict:
 def load_state() -> dict:
     if STATE_FILE.exists():
         with open(STATE_FILE) as f:
-            return json.load(f)
+            content = f.read().strip()
+            if content:
+                return json.loads(content)
     return {"scheduled": {}}
 
 
