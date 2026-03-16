@@ -1,0 +1,39 @@
+# EPG Auto-Recorder Configuration
+# Records shows by name whenever they appear in the guide
+
+# UHF Server connection
+uhf_server:
+  url: "http://192.168.68.12:8001"
+  # Path to UHF's TinyDB database file (mounted from uhf-server volume)
+  # No credentials needed — auth tokens are read/refreshed from this file
+  db_path: "/uhf-db/db.json"
+
+# Threadfin EPG/M3U sources
+threadfin:
+  xmltv_url: "http://192.168.68.12:34400/xmltv/threadfin.xml"
+  m3u_url: "http://192.168.68.12:34400/m3u/threadfin.m3u"
+
+# How often to check the EPG for new matches (in minutes)
+check_interval_minutes: 30
+
+# How many seconds of buffer to add before/after a show
+# (start earlier, end later to avoid clipping)
+buffer_before_seconds: 60
+buffer_after_seconds: 120
+
+# Shows to auto-record
+# Each entry needs a name pattern (case-insensitive substring match)
+# Optionally restrict to specific channels
+shows:
+  # Example: record "Planet Earth" on any channel
+  # - name: "Planet Earth"
+
+  # Example: record "Hook" only on BBC America
+  # - name: "Hook"
+  #   channels:
+  #     - "US: BBC America"
+
+  # Example: record anything with "Yellowstone" in the title on Paramount
+  # - name: "Yellowstone"
+  #   channels:
+  #     - "US: Paramount Network"
