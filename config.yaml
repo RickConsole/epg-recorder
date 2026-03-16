@@ -1,6 +1,9 @@
 # EPG Auto-Recorder Configuration
 # Records shows by name whenever they appear in the guide
 
+# Firebase API key (extract from UHF server binary)
+firebase_api_key: ""
+
 # UHF Server connection
 uhf_server:
   url: "http://192.168.68.12:8001"

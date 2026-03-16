@@ -67,6 +67,8 @@ The key volume mount is `./uhf-db:/uhf-db` — this shares UHF Server's database
 Edit `config.yaml`:
 
 ```yaml
+firebase_api_key: "your-key-here"
+
 uhf_server:
   url: "http://192.168.0.5:8000"
   db_path: "/uhf-db/db.json"
@@ -83,9 +85,9 @@ shows:
 ```
 
 #### Setup Firebase API key
-Then, you need to extract the firebase API key from the uhf server binary and add into `epg_recorder.py`. This is easy enough to extract but it is not something I want to openly publish here. 
-```
-FIREBASE_API_KEY = "sample"
+Then, you need to extract the Firebase API key from the UHF server binary and add it to `config.yaml`. This is easy enough to extract but it is not something I want to openly publish here.
+```yaml
+firebase_api_key: "your-key-here"
 ```
 
 ### 3. Run

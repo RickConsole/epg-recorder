@@ -32,10 +32,7 @@ log = logging.getLogger("epg-recorder")
 
 STATE_FILE = Path(__file__).parent / "state.json"
 
-FIREBASE_API_KEY = None  # Need to extract this from the UHF server binary. 
-FIREBASE_REFRESH_URL = (                                                                         
-    f"https://securetoken.googleapis.com/v1/token?key={FIREBASE_API_KEY}"                        
-)  
+FIREBASE_REFRESH_URL = "https://securetoken.googleapis.com/v1/token?key={}"
 
 # Device ID for our sidecar's token entry
 SIDECAR_DEVICE_ID = "epg-recorder-sidecar"
@@ -47,7 +44,11 @@ def load_config() -> dict:
         log.error("config.yaml not found")
         sys.exit(1)
     with open(config_path) as f:
-        return yaml.safe_load(f)
+        config = yaml.safe_load(f)
+    if not config.get("firebase_api_key"):
+        log.error("firebase_api_key not set in config.yaml")
+        sys.exit(1)
+    return config
 
 
 def load_state() -> dict:
@@ -67,10 +68,10 @@ def save_state(state: dict):
 # ── Auth (DB-based, no credentials needed) ────────────────────────────────────
 
 
-def firebase_refresh(refresh_token: str) -> dict:
+def firebase_refresh(refresh_token: str, api_key: str) -> dict:
     """Refresh a Firebase token via REST API."""
     resp = requests.post(
-        FIREBASE_REFRESH_URL,
+        FIREBASE_REFRESH_URL.format(api_key),
         json={"grant_type": "refresh_token", "refresh_token": refresh_token},
         timeout=15,
     )
@@ -83,7 +84,7 @@ def firebase_refresh(refresh_token: str) -> dict:
     }
 
 
-def get_auth_token(db_path: str, state: dict) -> str:
+def get_auth_token(db_path: str, state: dict, api_key: str) -> str:
     """
     Get a valid auth token by reading UHF's TinyDB, refreshing via Firebase,
     and writing the new token back into the DB so verify_token() finds it.
@@ -134,7 +135,7 @@ def get_auth_token(db_path: str, state: dict) -> str:
     # Refresh the token via Firebase
     log.info("Refreshing Firebase token for %s ...", user_email)
     try:
-        new_auth = firebase_refresh(refresh_token)
+        new_auth = firebase_refresh(refresh_token, api_key)
     except requests.HTTPError as e:
         log.error("Firebase token refresh failed: %s", e)
         log.error("The UHF app may need to be opened to re-authenticate")
@@ -388,7 +389,7 @@ def run_once(config: dict, state: dict):
     tf_cfg = config["threadfin"]
 
     # Auth via DB
-    token = get_auth_token(uhf_cfg["db_path"], state)
+    token = get_auth_token(uhf_cfg["db_path"], state, config["firebase_api_key"])
 
     # Fetch guide + channel map
     programmes = fetch_epg(tf_cfg["xmltv_url"])
